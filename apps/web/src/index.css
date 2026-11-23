@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  /* Brand palette */
+  --navy: #001E49;
+  --blue: #0048DB;
+  --red: #E00812;
+  --green: #11911D;
+  --orange: #FE9800;
+  --yellow: #FFDC0A;
+
+  /* Tints & neutrals */
+  --pink-tint: #FED7E1;
+  --mint: #D2F8E1;
+  --info-blue: #E8F0FE;
+  --border: #E1E6EF;
+  --muted: #5A6B85;
+  --surface: #FFFFFF;
+  --map-land: #E6DFD4;
+  --backdrop: #F4F7FC;
+
+  /* Shape & type */
+  --radius-sheet: 24px;
+  --radius-button: 14px;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--navy);
+  background: var(--backdrop);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+}
+
+button {
+  font-family: inherit;
+}
+
+.phone-shell {
+  max-width: 440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  overflow: hidden;
+}

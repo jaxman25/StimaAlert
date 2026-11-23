@@ -1,0 +1,338 @@
+/* ============================================================
+   Report Outage — screen 02
+   Colours come from the tokens in index.css unless the mockup
+   uses a shade that has no token (#FDD6E0 / #E8F0FD).
+   ============================================================ */
+
+.report-page {
+  overflow-y: auto;
+}
+
+/* ---------- Header ---------- */
+
+.report-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 64px;
+  padding: 0 8px;
+  background: var(--navy);
+  color: var(--surface);
+}
+
+.report-header__back {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--surface);
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.report-header__back svg {
+  width: 24px;
+  height: 24px;
+}
+
+.report-header__back:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.report-header__back:active {
+  transform: scale(0.94);
+}
+
+.report-header__back:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.report-header__title {
+  position: absolute;
+  left: 50%;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* ---------- Body ---------- */
+
+.report-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  /* no bottom padding: the skyline sits flush against the screen edge */
+  padding: 24px 24px 0;
+  background: var(--surface);
+}
+
+.report-field--spaced {
+  margin-top: 26px;
+}
+
+.report-field--tight {
+  margin-top: 18px;
+}
+
+.report-label {
+  display: block;
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+/* ---------- Power / Net tiles ---------- */
+
+.outage-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.outage-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 172px;
+  padding: 20px 12px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 160ms ease, border-color 160ms ease,
+    background 160ms ease;
+}
+
+.outage-tile__icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+}
+
+.outage-tile__label {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.outage-tile__badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--surface);
+}
+
+.outage-tile__badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Power tile */
+
+.outage-tile--power {
+  background: #FDD6E0;
+}
+
+.outage-tile--power .outage-tile__icon {
+  color: var(--red);
+}
+
+.outage-tile--power.is-selected {
+  border-color: var(--red);
+}
+
+/* Net tile */
+
+.outage-tile--net {
+  background: #E8F0FD;
+}
+
+.outage-tile--net .outage-tile__icon {
+  color: var(--blue);
+}
+
+.outage-tile--net.is-selected {
+  border-color: var(--blue);
+}
+
+.outage-tile--net .outage-tile__badge {
+  background: var(--blue);
+}
+
+.outage-tile:hover {
+  box-shadow: 0 6px 16px rgba(0, 30, 73, 0.12);
+}
+
+.outage-tile:active {
+  transform: scale(0.985);
+  box-shadow: none;
+}
+
+.outage-tile:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* ---------- Select fields ---------- */
+
+.select-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.select-field:hover {
+  border-color: #C7D0E0;
+}
+
+.select-field:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0, 72, 219, 0.14);
+}
+
+.select-field__icon {
+  position: absolute;
+  left: 16px;
+  width: 20px;
+  height: 20px;
+  color: var(--navy);
+  pointer-events: none;
+}
+
+.select-field__input {
+  width: 100%;
+  height: 100%;
+  padding: 0 44px 0 46px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-field__input:focus {
+  outline: none;
+}
+
+.select-field__chevron {
+  position: absolute;
+  right: 16px;
+  width: 22px;
+  height: 22px;
+  color: var(--navy);
+  pointer-events: none;
+}
+
+/* ---------- Submit ---------- */
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  margin-top: 30px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--red);
+  color: var(--surface);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease, transform 120ms ease, box-shadow 160ms ease;
+}
+
+.submit-button__icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
+.submit-button:hover {
+  background: #C0060F;
+  box-shadow: 0 6px 16px rgba(224, 8, 18, 0.28);
+}
+
+.submit-button:active {
+  transform: scale(0.99);
+  background: #A9050D;
+  box-shadow: none;
+}
+
+.submit-button:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* ---------- Info banner ---------- */
+
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--info-blue);
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.info-banner__badge {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: var(--surface);
+}
+
+.info-banner__badge svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ---------- Footer skyline ---------- */
+
+.report-footer {
+  display: block;
+  width: calc(100% + 48px);
+  height: 108px;
+  margin: auto -24px 0;
+  flex: 0 0 auto;
+  overflow: visible;
+}
