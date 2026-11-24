@@ -1,0 +1,266 @@
+/* ============================================================
+   Estate status — screen 04
+   Bottom-nav styles come from MapPage.css via the shared TabBar.
+   ============================================================ */
+
+.status-page {
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+
+.status-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 64px;
+  padding: 0 8px;
+  background: var(--navy);
+  color: var(--surface);
+}
+
+.status-header__back {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--surface);
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.status-header__back svg {
+  width: 24px;
+  height: 24px;
+}
+
+.status-header__back:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.status-header__back:active {
+  transform: scale(0.94);
+}
+
+.status-header__back:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.status-header__title {
+  position: absolute;
+  left: 50%;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* ---------- Body ---------- */
+
+.status-body {
+  flex: 1 1 auto;
+  padding: 20px;
+  background: var(--surface);
+  overflow-y: auto;
+}
+
+/* ---------- Status cards ---------- */
+
+.estate-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+}
+
+.estate-card + .estate-card {
+  margin-top: 16px;
+}
+
+.estate-card--power {
+  background: var(--pink-tint);
+  border: 1px solid rgba(224, 8, 18, 0.35);
+}
+
+.estate-card--internet {
+  background: var(--mint);
+  border: 1px solid transparent;
+}
+
+.estate-card__disc {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--surface);
+}
+
+.estate-card__disc svg {
+  width: 30px;
+  height: 30px;
+}
+
+.estate-card__wifi {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  color: var(--blue);
+}
+
+.estate-card__text {
+  min-width: 0;
+}
+
+.estate-card__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+}
+
+.estate-card--power .estate-card__title {
+  color: var(--red);
+}
+
+.estate-card--internet .estate-card__title {
+  color: var(--green);
+}
+
+.estate-card__line {
+  margin: 5px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--navy);
+}
+
+.estate-card--internet .estate-card__line {
+  font-weight: 500;
+}
+
+.estate-card__meta {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--navy);
+}
+
+/* ---------- Follow CTA ---------- */
+
+.follow-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: var(--radius-button);
+  background: var(--blue);
+  color: var(--surface);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease, transform 120ms ease, box-shadow 160ms ease;
+}
+
+.follow-button__icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
+.follow-button:hover {
+  background: #0039B0;
+  box-shadow: 0 6px 16px rgba(0, 72, 219, 0.28);
+}
+
+.follow-button:active {
+  transform: scale(0.99);
+  box-shadow: none;
+}
+
+.follow-button:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* ---------- Sections ---------- */
+
+.status-section {
+  margin-top: 26px;
+}
+
+.status-section__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.status-section__title svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  color: var(--blue);
+}
+
+.status-section__detail {
+  margin: 8px 0 0 32px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--navy);
+}
+
+/* ---------- Recent reports ---------- */
+
+.report-list {
+  margin: 8px 0 0;
+  padding: 0 0 0 32px;
+  list-style: none;
+}
+
+.report-list__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--navy);
+}
+
+.report-list__dot {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.report-list__dot--ok {
+  background: var(--green);
+}
+
+.report-list__dot--out {
+  background: var(--red);
+}

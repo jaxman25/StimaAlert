@@ -15,12 +15,64 @@ import { OutageDetail } from '../components/OutageDetail'
 import { OutageMap } from '../components/OutageMap'
 import './MapPage.css'
 
+export type TabKey = 'map' | 'status' | 'scheduled'
+
 type MapPageProps = {
-  onNavigate?: (screen: 'map' | 'status' | 'scheduled') => void
+  onNavigate?: (screen: TabKey) => void
   onReportOutage?: (type: 'power' | 'net') => void
+  onOpenAdmin?: () => void
 }
 
-export function MapPage({ onNavigate, onReportOutage }: MapPageProps) {
+type AppTabBarProps = {
+  active: TabKey
+  onNavigate?: (screen: TabKey) => void
+}
+
+/** Shared bottom navigation. Styles live in MapPage.css. */
+export function AppTabBar({ active, onNavigate }: AppTabBarProps) {
+  const tabClass = (key: TabKey) => (key === active ? 'tab tab--active' : 'tab')
+
+  return (
+    <nav className="tab-bar" aria-label="Primary">
+      <button
+        type="button"
+        className={tabClass('map')}
+        aria-current={active === 'map' ? 'page' : undefined}
+        onClick={() => onNavigate?.('map')}
+      >
+        <Home fill="currentColor" aria-hidden="true" />
+        <span className="tab__label">Map</span>
+      </button>
+
+      <button
+        type="button"
+        className={tabClass('status')}
+        aria-current={active === 'status' ? 'page' : undefined}
+        onClick={() => onNavigate?.('status')}
+      >
+        <BarChart3 aria-hidden="true" />
+        <span className="tab__label">Status</span>
+      </button>
+
+      <button
+        type="button"
+        className={tabClass('scheduled')}
+        aria-current={active === 'scheduled' ? 'page' : undefined}
+        onClick={() => onNavigate?.('scheduled')}
+      >
+        <Calendar aria-hidden="true" />
+        <span className="tab__label">Scheduled</span>
+      </button>
+
+      <button type="button" className="tab">
+        <Settings aria-hidden="true" />
+        <span className="tab__label">More</span>
+      </button>
+    </nav>
+  )
+}
+
+export function MapPage({ onNavigate, onReportOutage, onOpenAdmin }: MapPageProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
   return (
@@ -34,6 +86,9 @@ export function MapPage({ onNavigate, onReportOutage }: MapPageProps) {
         </div>
 
         <div className="header-actions">
+          <button type="button" className="admin-link" onClick={onOpenAdmin}>
+            Admin
+          </button>
           <button type="button" className="icon-button" aria-label="Search">
             <Search aria-hidden="true" />
           </button>
@@ -72,32 +127,7 @@ export function MapPage({ onNavigate, onReportOutage }: MapPageProps) {
         </button>
       </section>
 
-      <nav className="tab-bar" aria-label="Primary">
-        <button
-          type="button"
-          className="tab tab--active"
-          aria-current="page"
-          onClick={() => onNavigate?.('map')}
-        >
-          <Home fill="currentColor" aria-hidden="true" />
-          <span className="tab__label">Map</span>
-        </button>
-
-        <button type="button" className="tab" onClick={() => onNavigate?.('status')}>
-          <BarChart3 aria-hidden="true" />
-          <span className="tab__label">Status</span>
-        </button>
-
-        <button type="button" className="tab" onClick={() => onNavigate?.('scheduled')}>
-          <Calendar aria-hidden="true" />
-          <span className="tab__label">Scheduled</span>
-        </button>
-
-        <button type="button" className="tab">
-          <Settings aria-hidden="true" />
-          <span className="tab__label">More</span>
-        </button>
-      </nav>
+      <AppTabBar active="map" onNavigate={onNavigate} />
 
       {isDetailOpen && <OutageDetail onClose={() => setIsDetailOpen(false)} />}
     </div>

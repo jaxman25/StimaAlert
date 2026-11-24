@@ -1,0 +1,195 @@
+/* ============================================================
+   Scheduled outages — screen 05
+   Bottom-nav styles come from MapPage.css via the shared TabBar.
+   ============================================================ */
+
+.scheduled-page {
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+
+.scheduled-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 64px;
+  padding: 0 8px;
+  background: var(--navy);
+  color: var(--surface);
+}
+
+.scheduled-header__back {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--surface);
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.scheduled-header__back svg {
+  width: 24px;
+  height: 24px;
+}
+
+.scheduled-header__back:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.scheduled-header__back:active {
+  transform: scale(0.94);
+}
+
+.scheduled-header__back:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.scheduled-header__title {
+  position: absolute;
+  left: 50%;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* ---------- Body ---------- */
+
+.scheduled-body {
+  flex: 1 1 auto;
+  padding: 20px;
+  background: var(--surface);
+  overflow-y: auto;
+}
+
+.scheduled-section + .scheduled-section {
+  margin-top: 22px;
+}
+
+.scheduled-section__title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+/* ---------- Outage cards ---------- */
+
+.outage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.outage-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 84px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+
+.outage-card:hover {
+  border-color: #C9D4E5;
+  box-shadow: 0 4px 14px rgba(0, 30, 73, 0.08);
+}
+
+.outage-card:active {
+  transform: scale(0.995);
+  box-shadow: none;
+}
+
+.outage-card:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.outage-card__disc {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--surface);
+}
+
+.outage-card__disc svg {
+  width: 24px;
+  height: 24px;
+}
+
+.outage-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.outage-card__estate {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--navy);
+}
+
+.outage-card__window {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+.outage-card__chevron {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--navy);
+}
+
+/* ---------- Empty state ---------- */
+
+.scheduled-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #DCE7FD;
+}
+
+.scheduled-empty__icon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  color: var(--blue);
+}
+
+.scheduled-empty__text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--navy);
+}

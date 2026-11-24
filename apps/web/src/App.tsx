@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { AdminPage } from './pages/AdminPage'
 import { MapPage } from './pages/MapPage'
 import { ReportPage } from './pages/ReportPage'
+import { ScheduledPage } from './pages/ScheduledPage'
+import { StatusPage } from './pages/StatusPage'
 
-type Screen = 'map' | 'report' | 'status' | 'scheduled'
+type Screen = 'map' | 'report' | 'status' | 'scheduled' | 'admin'
 
 function App() {
   const [screen, setScreen] = useState<Screen>('map')
@@ -13,26 +16,21 @@ function App() {
         <MapPage
           onNavigate={setScreen}
           onReportOutage={() => setScreen('report')}
+          onOpenAdmin={() => setScreen('admin')}
         />
       )}
 
       {screen === 'report' && <ReportPage onBack={() => setScreen('map')} />}
 
-      {(screen === 'status' || screen === 'scheduled') && (
-        <div className="phone-shell">
-          <p
-            style={{
-              margin: 'auto',
-              padding: 24,
-              fontSize: 17,
-              fontWeight: 700,
-              color: 'var(--navy)',
-            }}
-          >
-            {screen === 'status' ? 'Status coming soon' : 'Scheduled outages coming soon'}
-          </p>
-        </div>
+      {screen === 'status' && (
+        <StatusPage onBack={() => setScreen('map')} onNavigate={setScreen} />
       )}
+
+      {screen === 'scheduled' && (
+        <ScheduledPage onBack={() => setScreen('map')} onNavigate={setScreen} />
+      )}
+
+      {screen === 'admin' && <AdminPage onBack={() => setScreen('map')} />}
     </>
   )
 }

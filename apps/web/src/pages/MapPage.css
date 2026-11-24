@@ -49,6 +49,30 @@
   margin-left: auto;
 }
 
+/* Temporary entry point to the internal admin screen. */
+.admin-link {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 130ms ease;
+}
+
+.admin-link:hover {
+  color: var(--surface);
+}
+
+.admin-link:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .icon-button {
   display: grid;
   place-items: center;
