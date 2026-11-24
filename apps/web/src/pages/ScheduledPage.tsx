@@ -1,20 +1,12 @@
+import { useEffect, useState } from 'react'
 import { ArrowLeft, Calendar, ChevronRight, Info } from 'lucide-react'
-import { AppTabBar, type TabKey } from './MapPage'
+import { useNavigate } from 'react-router-dom'
+import { fetchScheduledOutages, type ScheduledOutage } from '../lib/api'
+import { formatWindow, providerLabel } from '../lib/format'
+import { AppTabBar } from './MapPage'
 import './ScheduledPage.css'
 
-type ScheduledPageProps = {
-  onBack?: () => void
-  onNavigate?: (screen: TabKey) => void
-}
-
-const THIS_WEEK = [
-  { id: 'kplc-kinoo', estate: 'KPLC · Kinoo', window: 'Sat 23 Nov · 9am – 5pm' },
-  { id: 'safaricom-rongai', estate: 'Safaricom · Rongai', window: 'Sun 24 Nov · 1am – 4am' },
-]
-
-const NEXT_WEEK = [
-  { id: 'kplc-umoja-2', estate: 'KPLC · Umoja 2', window: 'Mon 25 Nov · 8am – 6pm' },
-]
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 type OutageCardProps = {
   estate: string
@@ -36,7 +28,39 @@ function OutageCard({ estate, window }: OutageCardProps) {
   )
 }
 
-export function ScheduledPage({ onBack, onNavigate }: ScheduledPageProps) {
+function splitByWeek(items: ScheduledOutage[]): {
+  thisWeek: ScheduledOutage[]
+  nextWeek: ScheduledOutage[]
+} {
+  const cutoff = Date.now() + WEEK_MS
+  return {
+    thisWeek: items.filter((item) => new Date(item.start_time).getTime() < cutoff),
+    nextWeek: items.filter((item) => new Date(item.start_time).getTime() >= cutoff),
+  }
+}
+
+export function ScheduledPage() {
+  const navigate = useNavigate()
+  const [items, setItems] = useState<ScheduledOutage[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetchScheduledOutages()
+      .then((rows) => {
+        if (!cancelled) setItems(rows)
+      })
+      .catch((error: unknown) => {
+        console.error('[ScheduledPage] could not load scheduled outages', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const { thisWeek, nextWeek } = splitByWeek(items)
+
   return (
     <div className="phone-shell scheduled-page">
       <header className="scheduled-header">
@@ -44,7 +68,7 @@ export function ScheduledPage({ onBack, onNavigate }: ScheduledPageProps) {
           type="button"
           className="scheduled-header__back"
           aria-label="Go back"
-          onClick={onBack}
+          onClick={() => navigate('/')}
         >
           <ArrowLeft aria-hidden="true" />
         </button>
@@ -52,33 +76,45 @@ export function ScheduledPage({ onBack, onNavigate }: ScheduledPageProps) {
       </header>
 
       <main className="scheduled-body">
-        <section className="scheduled-section">
-          <h2 className="scheduled-section__title">This week</h2>
-          <div className="outage-list">
-            {THIS_WEEK.map((item) => (
-              <OutageCard key={item.id} estate={item.estate} window={item.window} />
-            ))}
-          </div>
-        </section>
+        {thisWeek.length > 0 && (
+          <section className="scheduled-section">
+            <h2 className="scheduled-section__title">This week</h2>
+            <div className="outage-list">
+              {thisWeek.map((item) => (
+                <OutageCard
+                  key={item.id}
+                  estate={`${providerLabel(item.provider)} · ${item.estate}`}
+                  window={formatWindow(item.start_time, item.end_time)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-        <section className="scheduled-section">
-          <h2 className="scheduled-section__title">Next week</h2>
-          <div className="outage-list">
-            {NEXT_WEEK.map((item) => (
-              <OutageCard key={item.id} estate={item.estate} window={item.window} />
-            ))}
-          </div>
-        </section>
+        {nextWeek.length > 0 && (
+          <section className="scheduled-section">
+            <h2 className="scheduled-section__title">Next week</h2>
+            <div className="outage-list">
+              {nextWeek.map((item) => (
+                <OutageCard
+                  key={item.id}
+                  estate={`${providerLabel(item.provider)} · ${item.estate}`}
+                  window={formatWindow(item.start_time, item.end_time)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-        <div className="scheduled-empty">
-          <Info className="scheduled-empty__icon" aria-hidden="true" />
-          <p className="scheduled-empty__text">
-            No more scheduled outages this week — check back Friday.
-          </p>
-        </div>
+        {items.length === 0 && (
+          <div className="scheduled-empty">
+            <Info className="scheduled-empty__icon" aria-hidden="true" />
+            <p className="scheduled-empty__text">No scheduled outages right now.</p>
+          </div>
+        )}
       </main>
 
-      <AppTabBar active="scheduled" onNavigate={onNavigate} />
+      <AppTabBar active="scheduled" />
     </div>
   )
 }

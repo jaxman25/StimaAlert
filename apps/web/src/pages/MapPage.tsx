@@ -11,25 +11,30 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { OutageDetail } from '../components/OutageDetail'
 import { OutageMap } from '../components/OutageMap'
+import type { Outage } from '../lib/api'
 import './MapPage.css'
 
-export type TabKey = 'map' | 'status' | 'scheduled'
+export type TabKey = 'map' | 'status' | 'scheduled' | 'more'
 
-type MapPageProps = {
-  onNavigate?: (screen: TabKey) => void
-  onReportOutage?: (type: 'power' | 'net') => void
-  onOpenAdmin?: () => void
+const TAB_PATHS: Record<TabKey, string> = {
+  map: '/',
+  status: '/status',
+  scheduled: '/scheduled',
+  more: '/more',
 }
 
 type AppTabBarProps = {
   active: TabKey
-  onNavigate?: (screen: TabKey) => void
 }
 
 /** Shared bottom navigation. Styles live in MapPage.css. */
-export function AppTabBar({ active, onNavigate }: AppTabBarProps) {
+export function AppTabBar({ active }: AppTabBarProps) {
+  const navigate = useNavigate()
+
+  const go = (key: TabKey) => navigate(TAB_PATHS[key])
   const tabClass = (key: TabKey) => (key === active ? 'tab tab--active' : 'tab')
 
   return (
@@ -38,7 +43,7 @@ export function AppTabBar({ active, onNavigate }: AppTabBarProps) {
         type="button"
         className={tabClass('map')}
         aria-current={active === 'map' ? 'page' : undefined}
-        onClick={() => onNavigate?.('map')}
+        onClick={() => go('map')}
       >
         <Home fill="currentColor" aria-hidden="true" />
         <span className="tab__label">Map</span>
@@ -48,7 +53,7 @@ export function AppTabBar({ active, onNavigate }: AppTabBarProps) {
         type="button"
         className={tabClass('status')}
         aria-current={active === 'status' ? 'page' : undefined}
-        onClick={() => onNavigate?.('status')}
+        onClick={() => go('status')}
       >
         <BarChart3 aria-hidden="true" />
         <span className="tab__label">Status</span>
@@ -58,13 +63,18 @@ export function AppTabBar({ active, onNavigate }: AppTabBarProps) {
         type="button"
         className={tabClass('scheduled')}
         aria-current={active === 'scheduled' ? 'page' : undefined}
-        onClick={() => onNavigate?.('scheduled')}
+        onClick={() => go('scheduled')}
       >
         <Calendar aria-hidden="true" />
         <span className="tab__label">Scheduled</span>
       </button>
 
-      <button type="button" className="tab">
+      <button
+        type="button"
+        className={tabClass('more')}
+        aria-current={active === 'more' ? 'page' : undefined}
+        onClick={() => go('more')}
+      >
         <Settings aria-hidden="true" />
         <span className="tab__label">More</span>
       </button>
@@ -72,8 +82,9 @@ export function AppTabBar({ active, onNavigate }: AppTabBarProps) {
   )
 }
 
-export function MapPage({ onNavigate, onReportOutage, onOpenAdmin }: MapPageProps) {
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
+export function MapPage() {
+  const [selectedOutage, setSelectedOutage] = useState<Outage | null>(null)
+  const navigate = useNavigate()
 
   return (
     <div className="phone-shell">
@@ -86,9 +97,6 @@ export function MapPage({ onNavigate, onReportOutage, onOpenAdmin }: MapPageProp
         </div>
 
         <div className="header-actions">
-          <button type="button" className="admin-link" onClick={onOpenAdmin}>
-            Admin
-          </button>
           <button type="button" className="icon-button" aria-label="Search">
             <Search aria-hidden="true" />
           </button>
@@ -98,7 +106,7 @@ export function MapPage({ onNavigate, onReportOutage, onOpenAdmin }: MapPageProp
         </div>
       </header>
 
-      <OutageMap onSelectPin={() => setIsDetailOpen(true)} />
+      <OutageMap onSelectPin={setSelectedOutage} />
 
       <section className="bottom-sheet" aria-label="Selected estate">
         <button type="button" className="estate-row">
@@ -111,7 +119,7 @@ export function MapPage({ onNavigate, onReportOutage, onOpenAdmin }: MapPageProp
         <button
           type="button"
           className="action-button action-button--power"
-          onClick={() => onReportOutage?.('power')}
+          onClick={() => navigate('/report')}
         >
           <Zap fill="currentColor" stroke="none" aria-hidden="true" />
           Report Power Out
@@ -120,16 +128,18 @@ export function MapPage({ onNavigate, onReportOutage, onOpenAdmin }: MapPageProp
         <button
           type="button"
           className="action-button action-button--internet"
-          onClick={() => onReportOutage?.('net')}
+          onClick={() => navigate('/report')}
         >
           <Wifi aria-hidden="true" />
           Report Internet Out
         </button>
       </section>
 
-      <AppTabBar active="map" onNavigate={onNavigate} />
+      <AppTabBar active="map" />
 
-      {isDetailOpen && <OutageDetail onClose={() => setIsDetailOpen(false)} />}
+      {selectedOutage && (
+        <OutageDetail outage={selectedOutage} onClose={() => setSelectedOutage(null)} />
+      )}
     </div>
   )
 }

@@ -301,3 +301,11 @@
   outline: 2px solid var(--navy);
   outline-offset: 2px;
 }
+
+/* ---------- In-flight states ---------- */
+
+.admin-add:disabled,
+.admin-delete:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

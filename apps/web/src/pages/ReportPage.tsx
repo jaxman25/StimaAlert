@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import {
   ArrowLeft,
   Check,
@@ -9,16 +9,22 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { createOutage, type OutageProvider, type OutageType } from '../lib/api'
 import './ReportPage.css'
 
-type OutageType = 'power' | 'net'
+type FormOutageType = 'power' | 'net'
 
-type ReportPageProps = {
-  onBack?: () => void
-}
+const ESTATES = ['Rongai', 'Kinoo', 'Umoja 2']
 
-const ESTATES = ['Rongai 45', 'Rongai 12', 'Kiserian 3', 'Ongata Rongai']
-const PROVIDERS = ['Safaricom', 'Airtel', 'Telkom', 'Faiba', 'Other']
+/* Values must match the outage_provider enum in the database. */
+const PROVIDERS: { value: OutageProvider | ''; label: string }[] = [
+  { value: '', label: 'No provider' },
+  { value: 'KPLC', label: 'KPLC' },
+  { value: 'SAFARICOM', label: 'Safaricom' },
+  { value: 'ZUKU', label: 'Zuku' },
+  { value: 'FAIBA', label: 'Faiba' },
+]
 
 /** Decorative flat skyline, tones sampled from reference-ui/02_report_outage.png. */
 function Skyline() {
@@ -94,8 +100,36 @@ function Skyline() {
   )
 }
 
-export function ReportPage({ onBack }: ReportPageProps) {
-  const [outageType, setOutageType] = useState<OutageType>('power')
+export function ReportPage() {
+  const navigate = useNavigate()
+
+  const [outageType, setOutageType] = useState<FormOutageType>('power')
+  const [estate, setEstate] = useState('Rongai')
+  const [provider, setProvider] = useState<OutageProvider | ''>('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (submitting) return
+
+    const type: OutageType = outageType === 'power' ? 'POWER' : 'INTERNET'
+
+    setSubmitting(true)
+    try {
+      await createOutage({
+        type,
+        estate,
+        provider: provider === '' ? null : provider,
+      })
+      console.log(`[ReportPage] submitted ${type} outage for ${estate}`)
+      navigate('/')
+    } catch (error) {
+      console.error('[ReportPage] could not submit report', error)
+      alert(error instanceof Error ? error.message : 'Could not submit the report. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="phone-shell report-page">
@@ -104,7 +138,7 @@ export function ReportPage({ onBack }: ReportPageProps) {
           type="button"
           className="report-header__back"
           aria-label="Go back"
-          onClick={onBack}
+          onClick={() => navigate('/')}
         >
           <ArrowLeft aria-hidden="true" />
         </button>
@@ -112,82 +146,94 @@ export function ReportPage({ onBack }: ReportPageProps) {
       </header>
 
       <main className="report-body">
-        <section className="report-field">
-          <h2 className="report-label">What&rsquo;s out?</h2>
+        <form className="report-form" onSubmit={handleSubmit}>
+          <section className="report-field">
+            <h2 className="report-label">What&rsquo;s out?</h2>
 
-          <div className="outage-tiles">
-            <button
-              type="button"
-              className={`outage-tile outage-tile--power${outageType === 'power' ? ' is-selected' : ''}`}
-              aria-pressed={outageType === 'power'}
-              aria-label="Power outage"
-              onClick={() => setOutageType('power')}
-            >
-              <Zap className="outage-tile__icon" fill="currentColor" stroke="none" aria-hidden="true" />
-              <span className="outage-tile__label">Power</span>
-              {outageType === 'power' && (
-                <span className="outage-tile__badge" aria-hidden="true">
-                  <Check strokeWidth={3} />
-                </span>
-              )}
-            </button>
+            <div className="outage-tiles">
+              <button
+                type="button"
+                className={`outage-tile outage-tile--power${outageType === 'power' ? ' is-selected' : ''}`}
+                aria-pressed={outageType === 'power'}
+                aria-label="Power outage"
+                onClick={() => setOutageType('power')}
+              >
+                <Zap className="outage-tile__icon" fill="currentColor" stroke="none" aria-hidden="true" />
+                <span className="outage-tile__label">Power</span>
+                {outageType === 'power' && (
+                  <span className="outage-tile__badge" aria-hidden="true">
+                    <Check strokeWidth={3} />
+                  </span>
+                )}
+              </button>
 
-            <button
-              type="button"
-              className={`outage-tile outage-tile--net${outageType === 'net' ? ' is-selected' : ''}`}
-              aria-pressed={outageType === 'net'}
-              aria-label="Internet outage"
-              onClick={() => setOutageType('net')}
-            >
-              <Wifi className="outage-tile__icon" strokeWidth={2.4} aria-hidden="true" />
-              <span className="outage-tile__label">Net</span>
-              {outageType === 'net' && (
-                <span className="outage-tile__badge" aria-hidden="true">
-                  <Check strokeWidth={3} />
-                </span>
-              )}
-            </button>
-          </div>
-        </section>
+              <button
+                type="button"
+                className={`outage-tile outage-tile--net${outageType === 'net' ? ' is-selected' : ''}`}
+                aria-pressed={outageType === 'net'}
+                aria-label="Internet outage"
+                onClick={() => setOutageType('net')}
+              >
+                <Wifi className="outage-tile__icon" strokeWidth={2.4} aria-hidden="true" />
+                <span className="outage-tile__label">Net</span>
+                {outageType === 'net' && (
+                  <span className="outage-tile__badge" aria-hidden="true">
+                    <Check strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+            </div>
+          </section>
 
-        <section className="report-field report-field--spaced">
-          <label className="report-label" htmlFor="report-estate">
-            Where?
-          </label>
-          <div className="select-field">
-            <MapPin className="select-field__icon" fill="currentColor" stroke="none" aria-hidden="true" />
-            <select id="report-estate" className="select-field__input" defaultValue="Rongai 45">
-              {ESTATES.map((estate) => (
-                <option key={estate} value={estate}>
-                  {estate}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="select-field__chevron" aria-hidden="true" />
-          </div>
-        </section>
+          <section className="report-field report-field--spaced">
+            <label className="report-label" htmlFor="report-estate">
+              Where?
+            </label>
+            <div className="select-field">
+              <MapPin className="select-field__icon" fill="currentColor" stroke="none" aria-hidden="true" />
+              <select
+                id="report-estate"
+                className="select-field__input"
+                value={estate}
+                onChange={(event) => setEstate(event.target.value)}
+              >
+                {ESTATES.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="select-field__chevron" aria-hidden="true" />
+            </div>
+          </section>
 
-        <section className="report-field report-field--tight">
-          <label className="report-label" htmlFor="report-provider">
-            Provider (optional)
-          </label>
-          <div className="select-field">
-            <Wifi className="select-field__icon" strokeWidth={2.2} aria-hidden="true" />
-            <select id="report-provider" className="select-field__input" defaultValue="Safaricom">
-              {PROVIDERS.map((provider) => (
-                <option key={provider} value={provider}>
-                  {provider}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="select-field__chevron" aria-hidden="true" />
-          </div>
-        </section>
+          <section className="report-field report-field--tight">
+            <label className="report-label" htmlFor="report-provider">
+              Provider (optional)
+            </label>
+            <div className="select-field">
+              <Wifi className="select-field__icon" strokeWidth={2.2} aria-hidden="true" />
+              <select
+                id="report-provider"
+                className="select-field__input"
+                value={provider}
+                onChange={(event) => setProvider(event.target.value as OutageProvider | '')}
+              >
+                {PROVIDERS.map((option) => (
+                  <option key={option.label} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="select-field__chevron" aria-hidden="true" />
+            </div>
+          </section>
 
-        <button type="button" className="submit-button">
-          <Send className="submit-button__icon" aria-hidden="true" />
-          Submit Report
-        </button>
+          <button type="submit" className="submit-button" disabled={submitting}>
+            <Send className="submit-button__icon" aria-hidden="true" />
+            {submitting ? 'Submitting…' : 'Submit Report'}
+          </button>
+        </form>
 
         <p className="info-banner">
           <span className="info-banner__badge" aria-hidden="true">

@@ -74,6 +74,11 @@
   background: var(--surface);
 }
 
+/* The form is layout-transparent so the fields stay flex children of the body. */
+.report-form {
+  display: contents;
+}
+
 .report-field--spaced {
   margin-top: 26px;
 }
@@ -292,6 +297,13 @@
 .submit-button:focus-visible {
   outline: 2px solid var(--navy);
   outline-offset: 2px;
+}
+
+.submit-button:disabled {
+  background: #C2535A;
+  box-shadow: none;
+  cursor: progress;
+  transform: none;
 }
 
 /* ---------- Info banner ---------- */
