@@ -125,7 +125,7 @@ Cron (daily) ──► bot posts upcoming scheduled outages
 | **Cron** | Supabase Cron / Vercel Cron | Resolution prompts, scheduled-outage notifications |
 | **Bot** | Telegram Bot API | Primary channel in V1 |
 | **Admin** | Supabase Studio + a tiny admin page | Manual scheduled-outage entry |
-| **Hosting** | Vercel (frontend) + Supabase (backend) | Free tier |
+| **Hosting** | Vercel (frontend) + Supabase (backend) | Free tier — live at https://stima-alert-web.vercel.app |
 | **Later** | Node + Puppeteer (scraper), WhatsApp Cloud API | Post-launch only |
 
 **No scraper in V1. No server-side pinging in V1. No phone verification in V1.**

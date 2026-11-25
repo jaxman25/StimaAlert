@@ -1,6 +1,10 @@
 # StimaAlert
 
-Real-time, estate-level power & internet outage map for Kenya. Telegram-first, crowdsourced.
+> "Know before KPLC kills your work."
+
+**🔴 Live Demo:** [https://stima-alert-web.vercel.app](https://stima-alert-web.vercel.app)
+
+Real-time, estate-level power & internet outage map for Kenya. Telegram-first. Crowdsourced.
 
 An outage only shows on the map once enough neighbours confirm it, so a single report cannot
 skew the picture.
