@@ -93,7 +93,10 @@
 /* ---------- Bottom sheet ---------- */
 
 .bottom-sheet {
-  position: relative;
+  /* Sticky against .phone-shell's scroll box: on short viewports the sheet
+     stays put above the tab bar while the map scrolls behind it. */
+  position: sticky;
+  bottom: var(--tab-bar-height);
   z-index: 2;
   flex: 0 0 auto;
   /* 64% split: sheet top = viewport - tab bar (60px) - sheet height. */
@@ -181,7 +184,8 @@
 /* ---------- Tab bar ---------- */
 
 .tab-bar {
-  position: relative;
+  position: sticky;
+  bottom: 0;
   z-index: 3;
   display: grid;
   grid-template-columns: repeat(4, 1fr);

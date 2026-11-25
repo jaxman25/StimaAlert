@@ -27,7 +27,8 @@ export function StatusPage() {
 
     fetchScheduledOutages()
       .then((rows) => {
-        if (!cancelled) setNextScheduled(rows[0] ?? null)
+        // The endpoint returns every estate; this screen only covers ESTATE.
+        if (!cancelled) setNextScheduled(rows.find((row) => row.estate === ESTATE) ?? null)
       })
       .catch((error: unknown) => {
         console.error('[StatusPage] could not load scheduled outages', error)
@@ -109,16 +110,8 @@ export function StatusPage() {
             <History aria-hidden="true" />
             Recent reports
           </h2>
-          <ul className="report-list">
-            <li className="report-list__item">
-              <span className="report-list__dot report-list__dot--ok" aria-hidden="true" />
-              Power back – 11:02 AM
-            </li>
-            <li className="report-list__item">
-              <span className="report-list__dot report-list__dot--out" aria-hidden="true" />
-              Power out – 2:15 PM
-            </li>
-          </ul>
+          {/* No history endpoint yet, so there is nothing real to list. */}
+          <p className="status-section__detail">No recent reports</p>
         </section>
       </main>
 

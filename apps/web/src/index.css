@@ -24,6 +24,8 @@
   /* Shape & type */
   --radius-sheet: 24px;
   --radius-button: 14px;
+  /* Height of the shared tab bar, so the sheet can stay pinned above it. */
+  --tab-bar-height: 62px;
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -62,10 +64,15 @@ button {
 .phone-shell {
   max-width: 440px;
   margin: 0 auto;
-  min-height: 100vh;
+  /* dvh tracks mobile browser chrome, unlike 100vh. The vh line is the
+     fallback for browsers without dvh support. */
+  height: 100vh;
+  height: 100dvh;
   position: relative;
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
