@@ -79,6 +79,73 @@ export interface CreateScheduledOutageInput {
 export const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 /* ============================================================
+   Input validation
+   ------------------------------------------------------------
+   The database enforces these same limits with enums and column
+   types, so this is defense-in-depth: a bad value fails here with a
+   readable message instead of reaching the API at all.
+   ============================================================ */
+
+const OUTAGE_TYPES: readonly OutageType[] = ['POWER', 'INTERNET']
+const PROVIDERS: readonly OutageProvider[] = ['KPLC', 'SAFARICOM', 'ZUKU', 'FAIBA']
+const CONFIRMATION_KINDS: readonly ConfirmationKind[] = ['CONFIRM', 'STILL_OUT', 'BACK']
+
+/** Longest estate name the UI and database are expected to accept. */
+export const MAX_ESTATE_LENGTH = 100
+
+function invalidField(field: string, reason: string): never {
+  const message = `Invalid ${field}: ${reason}`
+  console.error(`[api] rejected input — ${message}`)
+  throw new Error(message)
+}
+
+/** Ensure a value is one of the outage types the database accepts. */
+export function validateOutageType(value: unknown): OutageType {
+  if (typeof value !== 'string' || !OUTAGE_TYPES.includes(value as OutageType)) {
+    invalidField('outage type', `expected POWER or INTERNET, received ${JSON.stringify(value)}`)
+  }
+  return value as OutageType
+}
+
+/** Trim an estate name and check it is present and a sane length. */
+export function validateEstate(value: unknown): string {
+  if (typeof value !== 'string') {
+    invalidField('estate', `expected a string, received ${JSON.stringify(value)}`)
+  }
+
+  const trimmed = value.trim()
+  if (trimmed.length === 0) invalidField('estate', 'must not be empty')
+  if (trimmed.length >= MAX_ESTATE_LENGTH) {
+    invalidField('estate', `must be under ${MAX_ESTATE_LENGTH} characters`)
+  }
+
+  return trimmed
+}
+
+/** Allow null/undefined, otherwise require one of the four known providers. */
+export function validateProvider(value: unknown): OutageProvider | null {
+  if (value === null || value === undefined) return null
+  if (typeof value !== 'string' || !PROVIDERS.includes(value as OutageProvider)) {
+    invalidField(
+      'provider',
+      `expected one of ${PROVIDERS.join(', ')} or null, received ${JSON.stringify(value)}`,
+    )
+  }
+  return value as OutageProvider
+}
+
+/** Ensure a confirmation kind is one the database accepts. */
+export function validateConfirmationKind(value: unknown): ConfirmationKind {
+  if (typeof value !== 'string' || !CONFIRMATION_KINDS.includes(value as ConfirmationKind)) {
+    invalidField(
+      'confirmation kind',
+      `expected CONFIRM, STILL_OUT or BACK, received ${JSON.stringify(value)}`,
+    )
+  }
+  return value as ConfirmationKind
+}
+
+/* ============================================================
    Helpers
    ============================================================ */
 
@@ -127,16 +194,44 @@ export function parsePoint(hex: string | null | undefined): LatLng | null {
    Reads
    ============================================================ */
 
-/** Active and pending outages, newest first. */
-export async function fetchActiveOutages(): Promise<Outage[]> {
-  const { data, error } = await supabase
-    .from('outages')
-    .select(OUTAGE_COLUMNS)
-    .in('status', ['ACTIVE', 'PENDING'])
-    .order('reported_at', { ascending: false })
+/** Delays between retries for reads that back the realtime map. */
+const RETRY_DELAYS_MS = [1000, 2000, 4000]
 
-  if (error) fail('fetchActiveOutages', error)
-  return (data ?? []) as unknown as Outage[]
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * Active and pending outages, newest first.
+ *
+ * This is the map's initial load and its realtime fallback, so a transient
+ * failure is retried up to 3 times (1s, 2s, 4s) before giving up — enough to
+ * ride out a blip without hammering the database.
+ */
+export async function fetchActiveOutages(): Promise<Outage[]> {
+  let lastError: DbError | null = null
+
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
+    const { data, error } = await supabase
+      .from('outages')
+      .select(OUTAGE_COLUMNS)
+      .in('status', ['ACTIVE', 'PENDING'])
+      .order('reported_at', { ascending: false })
+
+    if (!error) return (data ?? []) as unknown as Outage[]
+
+    lastError = error
+    const delay = RETRY_DELAYS_MS[attempt]
+    if (delay === undefined) break
+
+    console.warn(
+      `[api] fetchActiveOutages attempt ${attempt + 1} failed, retrying in ${delay}ms`,
+      error,
+    )
+    await sleep(delay)
+  }
+
+  fail('fetchActiveOutages', lastError ?? { message: 'unknown error' })
 }
 
 /** The most recently reported outage for one estate, or null when it has none. */
@@ -173,7 +268,13 @@ export async function fetchScheduledOutages(): Promise<ScheduledOutage[]> {
 export async function createOutage(payload: CreateOutageInput): Promise<Outage> {
   const { lat, lng, ...fields } = payload
 
-  const row: Record<string, unknown> = { ...fields, status: 'PENDING' }
+  // Validate before building the row: a hostile or buggy caller should fail
+  // here rather than at the database.
+  const type = validateOutageType(fields.type)
+  const estate = validateEstate(fields.estate)
+  const provider = validateProvider(fields.provider)
+
+  const row: Record<string, unknown> = { ...fields, type, estate, provider, status: 'PENDING' }
 
   if (typeof lat === 'number' && typeof lng === 'number') {
     row.location = `SRID=4326;POINT(${lng} ${lat})`
@@ -258,9 +359,11 @@ export async function submitConfirmation(
   userId: string,
   kind: ConfirmationKind,
 ): Promise<Confirmation> {
+  const validatedKind = validateConfirmationKind(kind)
+
   const { data, error } = await supabase
     .from('confirmations')
-    .insert({ outage_id: outageId, user_id: userId, kind })
+    .insert({ outage_id: outageId, user_id: userId, kind: validatedKind })
     .select()
     .single()
 

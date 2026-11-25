@@ -4,6 +4,22 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 import './LoginPage.css'
 
+const RATE_LIMIT_MESSAGE = 'Too many attempts. Please wait a few minutes and try again.'
+
+/**
+ * Supabase reports throttling as a 429 status, and some endpoints only say so
+ * in the message. Match either so a locked-out user isn't told their password
+ * is wrong.
+ */
+function isRateLimitError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false
+
+  const { status, message } = error as { status?: unknown; message?: unknown }
+  if (status === 429) return true
+
+  return typeof message === 'string' && /rate limit|too many requests/i.test(message)
+}
+
 export function LoginPage() {
   const navigate = useNavigate()
   const { session, signIn } = useAuth()
@@ -29,7 +45,12 @@ export function LoginPage() {
       navigate('/admin', { replace: true })
     } catch (err) {
       console.error('[LoginPage] sign in failed', err)
-      setError(err instanceof Error ? err.message : 'Could not sign in. Try again.')
+
+      if (isRateLimitError(err)) {
+        setError(RATE_LIMIT_MESSAGE)
+      } else {
+        setError(err instanceof Error ? err.message : 'Could not sign in. Try again.')
+      }
     } finally {
       setSubmitting(false)
     }
