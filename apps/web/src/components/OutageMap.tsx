@@ -80,6 +80,9 @@ type OutageMapProps = {
 }
 
 export function OutageMap({ onSelectPin }: OutageMapProps) {
+  /* A still of the same view, served from our origin, so the map area paints
+     immediately instead of waiting on third-party raster tiles. */
+  const [posterHidden, setPosterHidden] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const layerRef = useRef<L.LayerGroup | null>(null)
@@ -223,7 +226,9 @@ export function OutageMap({ onSelectPin }: OutageMapProps) {
       maxZoom: 19,
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map)
+    })
+      .on('load', () => setPosterHidden(true))
+      .addTo(map)
 
     layerRef.current = L.layerGroup().addTo(map)
 
@@ -296,6 +301,9 @@ export function OutageMap({ onSelectPin }: OutageMapProps) {
 
   return (
     <div className="map-area">
+      {!posterHidden && (
+        <img className="map-poster" src="/map-poster.webp" alt="" aria-hidden="true" />
+      )}
       <div
         ref={containerRef}
         className="outage-map"

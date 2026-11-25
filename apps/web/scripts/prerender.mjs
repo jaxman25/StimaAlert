@@ -83,8 +83,12 @@ function headFor(route) {
 
 const template = await readFile(join(dist, 'index.html'), 'utf8')
 
+/* The map still is only useful on the map page; don't make other routes fetch it. */
+const POSTER_PRELOAD = '    <link rel="preload" as="image" href="/map-poster.webp" />\n'
+
 for (const route of seo.routes) {
   const html = template
+    .replace(POSTER_PRELOAD, route.path === '/' ? POSTER_PRELOAD : '')
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(route.title)}</title>`)
     .replace(
       /<meta name="description"[^>]*>/,

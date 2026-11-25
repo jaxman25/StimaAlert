@@ -12,6 +12,7 @@
     />
     <!-- The map tile that paints first is the page's LCP; warm the connection
          while React is still booting so it isn't paying for TLS. -->
+    <link rel="preload" as="image" href="/map-poster.webp" />
     <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
     <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
     <link rel="preconnect" href="https://c.tile.openstreetmap.org" crossorigin />
