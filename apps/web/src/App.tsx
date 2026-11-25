@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { SeoMeta } from './lib/seo'
 import { AdminPage } from './pages/AdminPage'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
@@ -25,6 +26,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <SeoMeta />
         <Routes>
           <Route path="/" element={<MapPage />} />
           <Route path="/report" element={<ReportPage />} />

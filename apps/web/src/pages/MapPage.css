@@ -153,6 +153,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  text-decoration: none;
   width: 100%;
   height: 56px;
   border: 0;
@@ -198,6 +199,7 @@
 .tab {
   display: flex;
   flex-direction: column;
+  text-decoration: none;
   align-items: center;
   gap: 3px;
   padding: 2px 0 0;

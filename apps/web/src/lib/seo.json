@@ -1,0 +1,60 @@
+{
+  "origin": "https://stima-alert-web.vercel.app",
+  "routes": [
+    {
+      "path": "/",
+      "title": "StimaAlert — Kenya Power & Internet Outage Map",
+      "description": "See live power and internet outages by estate in Kenya. Report an outage in two taps and follow your estate on Telegram for an alert when power returns.",
+      "priority": "1.0",
+      "inSitemap": true
+    },
+    {
+      "path": "/status",
+      "title": "Estate Power & Internet Status — StimaAlert",
+      "description": "Check whether power and internet are up in Rongai right now, with the current outage start time, confirmation count and upcoming scheduled maintenance.",
+      "priority": "0.8",
+      "inSitemap": true
+    },
+    {
+      "path": "/report",
+      "title": "Report a Power or Internet Outage — StimaAlert",
+      "description": "Report a power cut or internet outage in your Kenyan estate in two taps. Neighbours confirm it, and the map updates as soon as the outage is verified.",
+      "priority": "0.8",
+      "inSitemap": true
+    },
+    {
+      "path": "/scheduled",
+      "title": "Scheduled Power Outages in Kenya — StimaAlert",
+      "description": "Upcoming KPLC and ISP maintenance windows by estate, so you can plan around a scheduled power or internet outage instead of being surprised by it.",
+      "priority": "0.7",
+      "inSitemap": true
+    },
+    {
+      "path": "/more",
+      "title": "About StimaAlert — How the Outage Map Works",
+      "description": "How StimaAlert collects and verifies estate outage reports, what the Telegram bot sends you, and answers to common questions about the map and your data.",
+      "priority": "0.6",
+      "inSitemap": true,
+      "faq": [
+        {
+          "question": "Where does StimaAlert's outage data come from?",
+          "answer": "From residents. Anyone can report an outage, and other people in the same estate confirm it. A report becomes ACTIVE once neighbours back it up. There is no scraping and no server-side pinging."
+        },
+        {
+          "question": "Do I need an account to use StimaAlert?",
+          "answer": "No. The map is public and anonymous. The Telegram bot only stores your chat id so it can message you about the estates you follow."
+        },
+        {
+          "question": "How quickly will I hear that power is back?",
+          "answer": "When an outage is resolved, everyone following that estate gets a Telegram message. The bot also asks followers whether power has returned about two hours after an outage is reported."
+        }
+      ]
+    },
+    {
+      "path": "/login",
+      "title": "Admin Log In — StimaAlert",
+      "description": "Sign in to manage scheduled outages on StimaAlert. This page is for the estate admin and is not part of the public outage map.",
+      "inSitemap": false
+    }
+  ]
+}

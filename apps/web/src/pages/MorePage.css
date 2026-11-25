@@ -39,6 +39,7 @@
 
 .more-item {
   display: flex;
+  text-decoration: none;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -91,6 +92,38 @@
 }
 
 /* ---------- Admin login entry ---------- */
+
+.more-faq {
+  margin-top: 24px;
+}
+
+.more-faq__title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.more-faq__item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.more-faq__question {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.more-faq__answer {
+  margin: 6px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--muted);
+}
 
 .more-admin-link {
   align-self: center;

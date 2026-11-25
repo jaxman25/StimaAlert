@@ -11,7 +11,7 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { OutageDetail } from '../components/OutageDetail'
 import { OutageMap } from '../components/OutageMap'
 import type { Outage } from '../lib/api'
@@ -32,62 +32,57 @@ type AppTabBarProps = {
 
 /** Shared bottom navigation. Styles live in MapPage.css. */
 export function AppTabBar({ active }: AppTabBarProps) {
-  const navigate = useNavigate()
-
-  const go = (key: TabKey) => navigate(TAB_PATHS[key])
   const tabClass = (key: TabKey) => (key === active ? 'tab tab--active' : 'tab')
 
+  // Real links, not buttons, so crawlers can follow every top-level page.
   return (
     <nav className="tab-bar" aria-label="Primary">
-      <button
-        type="button"
+      <Link
         className={tabClass('map')}
+        to={TAB_PATHS.map}
         aria-current={active === 'map' ? 'page' : undefined}
-        onClick={() => go('map')}
       >
         <Home fill="currentColor" aria-hidden="true" />
         <span className="tab__label">Map</span>
-      </button>
+      </Link>
 
-      <button
-        type="button"
+      <Link
         className={tabClass('status')}
+        to={TAB_PATHS.status}
         aria-current={active === 'status' ? 'page' : undefined}
-        onClick={() => go('status')}
       >
         <BarChart3 aria-hidden="true" />
         <span className="tab__label">Status</span>
-      </button>
+      </Link>
 
-      <button
-        type="button"
+      <Link
         className={tabClass('scheduled')}
+        to={TAB_PATHS.scheduled}
         aria-current={active === 'scheduled' ? 'page' : undefined}
-        onClick={() => go('scheduled')}
       >
         <Calendar aria-hidden="true" />
         <span className="tab__label">Scheduled</span>
-      </button>
+      </Link>
 
-      <button
-        type="button"
+      <Link
         className={tabClass('more')}
+        to={TAB_PATHS.more}
         aria-current={active === 'more' ? 'page' : undefined}
-        onClick={() => go('more')}
       >
         <Settings aria-hidden="true" />
         <span className="tab__label">More</span>
-      </button>
+      </Link>
     </nav>
   )
 }
 
 export function MapPage() {
   const [selectedOutage, setSelectedOutage] = useState<Outage | null>(null)
-  const navigate = useNavigate()
 
   return (
     <div className="phone-shell">
+      <h1 className="sr-only">StimaAlert — live power and internet outage map for Kenya</h1>
+
       <header className="app-header">
         <div className="brand">
           <Zap className="brand__bolt" fill="currentColor" stroke="none" aria-hidden="true" />
@@ -116,23 +111,15 @@ export function MapPage() {
           <ChevronDown className="estate-row__chevron" aria-hidden="true" />
         </button>
 
-        <button
-          type="button"
-          className="action-button action-button--power"
-          onClick={() => navigate('/report')}
-        >
+        <Link className="action-button action-button--power" to="/report">
           <Zap fill="currentColor" stroke="none" aria-hidden="true" />
           Report Power Out
-        </button>
+        </Link>
 
-        <button
-          type="button"
-          className="action-button action-button--internet"
-          onClick={() => navigate('/report')}
-        >
+        <Link className="action-button action-button--internet" to="/report">
           <Wifi aria-hidden="true" />
           Report Internet Out
-        </button>
+        </Link>
       </section>
 
       <AppTabBar active="map" />

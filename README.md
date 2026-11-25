@@ -51,7 +51,7 @@ docs/
   LAUNCH.md     Launch checklist
   SECURITY.md   RLS, headers, rate limits and the localStorage tradeoff
 reference-ui/   Screen mockups (git-ignored, local only)
-vercel.json     Deployment: SPA rewrite, build config and security headers
+vercel.json     Deployment: clean URLs, SPA rewrite, build config and security headers
 .vercelignore   Keeps the bot, edge functions and tests out of the build
 ```
 
@@ -64,7 +64,7 @@ Each app installs its own dependencies — this is not an npm-workspaces monorep
 cd apps/web
 npm install
 npm run dev      # Vite dev server
-npm run build    # tsc -b && vite build
+npm run build    # tsc -b && vite build && prerender (per-route heads + sitemap)
 npm run preview  # serve the production build
 npm run lint     # eslint
 ```
@@ -205,7 +205,8 @@ root** — `vercel.json` lives here and sets the rest:
 | `installCommand` | `npm ci --prefix apps/web` |
 | `buildCommand` | `npm run build --prefix apps/web` |
 | `outputDirectory` | `apps/web/dist` |
-| `rewrites` | every path → `/index.html` (SPA routing) |
+| `cleanUrls` | serves `/status` from `status.html` instead of redirecting |
+| `rewrites` | unmatched paths → `/index.html` (SPA routing) |
 | `headers` | CSP + hardening headers on `/(.*)` |
 
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project's environment
@@ -221,11 +222,24 @@ curl -sI https://stima-alert-web.vercel.app | grep -i content-security-policy
 If that comes back empty, the project's Root Directory is probably set to `apps/web`, which makes
 Vercel ignore this `vercel.json` entirely.
 
+## SEO
+
+Metadata lives in `apps/web/src/lib/seo.json` — one entry per route with title, description,
+priority and (for `/more`) the visible FAQ. Two consumers read it: the React `<SeoMeta />`
+component keeps the head correct during in-app navigation, and `apps/web/scripts/prerender.mjs`
+runs after `vite build` to write `dist/<route>.html` with that route's title, description,
+canonical, Open Graph tags and JSON-LD, plus `dist/sitemap.xml`. `robots.txt` allows crawling,
+points at the sitemap and blocks `/admin`; `/login` is intentionally absent from the sitemap.
+
+This is build-time HTML, not server-side rendering: crawlers that read the raw HTML see the right
+head for each URL, but the page body is still rendered by JavaScript.
+
 ## Docs
 
 - [`docs/SPEC.md`](docs/SPEC.md) — product spec, data model, API and bot flows
 - [`docs/LAUNCH.md`](docs/LAUNCH.md) — launch checklist
 - [`docs/SECURITY.md`](docs/SECURITY.md) — RLS matrix, CSP rationale, rate limits, token storage
+- [`docs/SSR-PLAN.md`](docs/SSR-PLAN.md) — what a server-rendered migration would take
 
 ## Next steps
 

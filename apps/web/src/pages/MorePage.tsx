@@ -1,11 +1,10 @@
 import { ChevronRight, ShieldCheck } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { moreFaq } from '../lib/seo'
 import { AppTabBar } from './MapPage'
 import './MorePage.css'
 
 export function MorePage() {
-  const navigate = useNavigate()
-
   return (
     <div className="phone-shell more-page">
       <header className="more-header">
@@ -13,15 +12,25 @@ export function MorePage() {
       </header>
 
       <main className="more-body">
-        <button type="button" className="more-item" onClick={() => navigate('/admin')}>
+        <Link className="more-item" to="/admin">
           <ShieldCheck className="more-item__icon" aria-hidden="true" />
           <span className="more-item__label">Admin Portal</span>
           <ChevronRight className="more-item__chevron" aria-hidden="true" />
-        </button>
+        </Link>
 
-        <button type="button" className="more-admin-link" onClick={() => navigate('/login')}>
+        <section className="more-faq" aria-labelledby="more-faq-title">
+          <h2 className="more-faq__title" id="more-faq-title">Questions</h2>
+          {moreFaq.map((item) => (
+            <details className="more-faq__item" key={item.question}>
+              <summary className="more-faq__question">{item.question}</summary>
+              <p className="more-faq__answer">{item.answer}</p>
+            </details>
+          ))}
+        </section>
+
+        <Link className="more-admin-link" to="/login">
           Admin Login
-        </button>
+        </Link>
       </main>
 
       <AppTabBar active="more" />
