@@ -29,6 +29,8 @@
 /* ---------- Body ---------- */
 
 .more-body {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   padding: 20px;
   background: var(--surface);
@@ -86,4 +88,32 @@
   width: 20px;
   height: 20px;
   color: var(--muted);
+}
+
+/* ---------- Admin login entry ---------- */
+
+.more-admin-link {
+  align-self: center;
+  margin-top: auto;
+  padding: 14px 12px 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 130ms ease;
+}
+
+.more-admin-link:hover {
+  color: var(--blue);
+}
+
+.more-admin-link:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 6px;
 }

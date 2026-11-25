@@ -64,6 +64,43 @@
   line-height: 1;
 }
 
+.admin-header__logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background: none;
+  color: var(--surface);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 130ms ease, transform 120ms ease;
+}
+
+.admin-header__logout svg {
+  width: 16px;
+  height: 16px;
+}
+
+.admin-header__logout:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.admin-header__logout:active {
+  transform: scale(0.96);
+}
+
+.admin-header__logout:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
 /* ---------- Body ---------- */
 
 .admin-body {

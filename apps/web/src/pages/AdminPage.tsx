@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { ArrowLeft, Calendar, ChevronDown, Clock, Plus, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, ChevronDown, Clock, LogOut, Plus, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../lib/AuthContext'
 import {
   createScheduledOutage,
   deleteScheduledOutage,
@@ -33,6 +34,7 @@ function toIsoTimestamp(date: string, time: string): string {
 
 export function AdminPage() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
 
   const [provider, setProvider] = useState<OutageProvider>('KPLC')
   const [estate, setEstate] = useState('Kinoo')
@@ -91,6 +93,16 @@ export function AdminPage() {
     }
   }
 
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      navigate('/', { replace: true })
+    } catch (error) {
+      console.error('[AdminPage] could not sign out', error)
+      alert('Could not log out. Check the console for details.')
+    }
+  }
+
   const handleDelete = async (id: string) => {
     if (deletingId) return
 
@@ -119,6 +131,14 @@ export function AdminPage() {
         </button>
         <ShieldCheck className="admin-header__shield" aria-hidden="true" />
         <h1 className="admin-header__title">StimaAlert Admin</h1>
+        <button
+          type="button"
+          className="admin-header__logout"
+          onClick={handleSignOut}
+        >
+          <LogOut aria-hidden="true" />
+          Log Out
+        </button>
       </header>
 
       <main className="admin-body">

@@ -18,6 +18,10 @@ export function MorePage() {
           <span className="more-item__label">Admin Portal</span>
           <ChevronRight className="more-item__chevron" aria-hidden="true" />
         </button>
+
+        <button type="button" className="more-admin-link" onClick={() => navigate('/login')}>
+          Admin Login
+        </button>
       </main>
 
       <AppTabBar active="more" />

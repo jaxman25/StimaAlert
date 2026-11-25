@@ -1,0 +1,204 @@
+/* ============================================================
+   Login — gate for the admin panel
+   ============================================================ */
+
+.login-page {
+  overflow: hidden;
+}
+
+/* ---------- Header (matches the admin header) ---------- */
+
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  height: 64px;
+  padding: 0 16px 0 8px;
+  background: var(--navy);
+  color: var(--surface);
+}
+
+.login-header__back {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--surface);
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.login-header__back svg {
+  width: 22px;
+  height: 22px;
+}
+
+.login-header__back:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.login-header__back:active {
+  transform: scale(0.94);
+}
+
+.login-header__back:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.login-header__shield {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+}
+
+.login-header__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---------- Body ---------- */
+
+.login-body {
+  flex: 1 1 auto;
+  padding: 32px 24px;
+  background: var(--surface);
+  overflow-y: auto;
+}
+
+.login-intro {
+  margin-bottom: 26px;
+}
+
+.login-intro__title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.login-intro__text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ---------- Form ---------- */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.login-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-control__icon {
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.login-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px 0 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.login-input::placeholder {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0, 72, 219, 0.12);
+}
+
+/* ---------- Error ---------- */
+
+.login-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--pink-tint);
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ---------- Submit ---------- */
+
+.login-submit {
+  width: 100%;
+  height: 52px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--blue);
+  color: var(--surface);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease, transform 120ms ease, box-shadow 160ms ease;
+}
+
+.login-submit:hover {
+  background: #0039B0;
+  box-shadow: 0 6px 16px rgba(0, 72, 219, 0.28);
+}
+
+.login-submit:active {
+  transform: scale(0.99);
+  box-shadow: none;
+}
+
+.login-submit:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+  box-shadow: none;
+}
