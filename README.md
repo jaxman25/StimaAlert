@@ -45,7 +45,7 @@ apps/
 packages/
   shared/       Shared types and Supabase client helpers — scaffold
 supabase/
-  migrations/   SQL migrations (001–008), applied in order
+  migrations/   SQL migrations (001–009), applied in order
 docs/
   SPEC.md       Full MVP spec
   LAUNCH.md     Launch checklist
@@ -113,6 +113,12 @@ Commands: `/start` registers the chat in `users`, `/follow <estate>` and `/unfol
 maintain `followed_estates`, `/status <estate>` reads active outages, and `/report` posts a
 PENDING outage via inline buttons.
 
+`npm start` also subscribes to `outages` over Supabase Realtime and messages every follower when
+an outage goes PENDING → ACTIVE. Reporters and anyone who already confirmed that outage are
+skipped. When it is later RESOLVED, followers get a "back ON" message. Both transitions need
+`009_replica_identity.sql`: without it the realtime payload's `old` row contains only the id, so
+the change is ignored.
+
 `npm start` runs long polling; `npm run resolve-prompts` is a one-shot job meant for a scheduler
 (Supabase Cron or Vercel Cron), not the poller. Set `DRY_RUN=1` to log who would be messaged
 without sending. It asks followers of an active estate two hours after a report, re-asks at most
@@ -155,6 +161,7 @@ order** — later files drop and recreate policies from earlier ones:
 | `006_scheduled_realtime.sql` | Publishes `scheduled` to realtime |
 | `007_admin_write_policies.sql` | Admin writes require an authenticated session |
 | `008_prompt_count.sql` | `outages.prompt_count`, so the bot asks "is it back?" at most 3× |
+| `009_replica_identity.sql` | Full old rows on `outages` updates, so the bot sees PENDING → ACTIVE |
 
 Apply them with the Supabase CLI:
 
@@ -222,8 +229,8 @@ Vercel ignore this `vercel.json` entirely.
 
 ## Next steps
 
-- Apply migrations `002`–`008` to the live database (see the table above); `008` is required
-  before `npm run resolve-prompts` can run
+- Apply migrations `002`–`009` to the live database (see the table above); `008` is required by
+  `npm run resolve-prompts`, `009` by the ACTIVE-notification subscription
 - Schedule `npm run resolve-prompts` on a cron and point it at the bot host
 - Replace the demo user id in `apps/web/src/lib/api.ts` with real reporter identity
 - Build the `scheduled-notify` job
