@@ -10,6 +10,11 @@
       type="font/woff2"
       crossorigin
     />
+    <!-- The map tile that paints first is the page's LCP; warm the connection
+         while React is still booting so it isn't paying for TLS. -->
+    <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
+    <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
+    <link rel="preconnect" href="https://c.tile.openstreetmap.org" crossorigin />
     <meta name="theme-color" content="#001E49" />
     <meta name="description" content="Real-time, estate-level power and internet outage map for Kenya." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

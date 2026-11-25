@@ -1,15 +1,14 @@
-import { Suspense, lazy, useState } from 'react'
+import { useState } from 'react'
 import { ChevronDown, MapPin, Menu, Search, Wifi, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AppTabBar } from '../components/AppTabBar'
 import { OutageDetail } from '../components/OutageDetail'
+/* The route itself is lazy, so Leaflet is only fetched on the map page. Loading
+   it here (rather than with a second lazy() boundary) avoids a request
+   waterfall that delayed the first map tiles by half a second. */
+import { OutageMap } from '../components/OutageMap'
 import type { Outage } from '../lib/api'
 import './MapPage.css'
-
-/* Leaflet is ~150 kB; keep it out of the shell so the header and buttons paint first. */
-const OutageMap = lazy(() =>
-  import('../components/OutageMap').then((module) => ({ default: module.OutageMap })),
-)
 
 export function MapPage() {
   const [selectedOutage, setSelectedOutage] = useState<Outage | null>(null)
@@ -36,9 +35,7 @@ export function MapPage() {
         </div>
       </header>
 
-      <Suspense fallback={<div className="map-area" aria-hidden="true" />}>
-        <OutageMap onSelectPin={setSelectedOutage} />
-      </Suspense>
+      <OutageMap onSelectPin={setSelectedOutage} />
 
       <section className="bottom-sheet" aria-label="Selected estate">
         <button type="button" className="estate-row">
