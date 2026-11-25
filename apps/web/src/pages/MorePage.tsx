@@ -1,7 +1,7 @@
 import { ChevronRight, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { moreFaq } from '../lib/seo'
-import { AppTabBar } from './MapPage'
+import { AppTabBar } from '../components/AppTabBar'
 import './MorePage.css'
 
 export function MorePage() {

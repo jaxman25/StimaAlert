@@ -1,80 +1,15 @@
-import { useState } from 'react'
-import {
-  BarChart3,
-  Calendar,
-  ChevronDown,
-  Home,
-  MapPin,
-  Menu,
-  Search,
-  Settings,
-  Wifi,
-  Zap,
-} from 'lucide-react'
+import { Suspense, lazy, useState } from 'react'
+import { ChevronDown, MapPin, Menu, Search, Wifi, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { AppTabBar } from '../components/AppTabBar'
 import { OutageDetail } from '../components/OutageDetail'
-import { OutageMap } from '../components/OutageMap'
 import type { Outage } from '../lib/api'
 import './MapPage.css'
 
-export type TabKey = 'map' | 'status' | 'scheduled' | 'more'
-
-const TAB_PATHS: Record<TabKey, string> = {
-  map: '/',
-  status: '/status',
-  scheduled: '/scheduled',
-  more: '/more',
-}
-
-type AppTabBarProps = {
-  active: TabKey
-}
-
-/** Shared bottom navigation. Styles live in MapPage.css. */
-export function AppTabBar({ active }: AppTabBarProps) {
-  const tabClass = (key: TabKey) => (key === active ? 'tab tab--active' : 'tab')
-
-  // Real links, not buttons, so crawlers can follow every top-level page.
-  return (
-    <nav className="tab-bar" aria-label="Primary">
-      <Link
-        className={tabClass('map')}
-        to={TAB_PATHS.map}
-        aria-current={active === 'map' ? 'page' : undefined}
-      >
-        <Home fill="currentColor" aria-hidden="true" />
-        <span className="tab__label">Map</span>
-      </Link>
-
-      <Link
-        className={tabClass('status')}
-        to={TAB_PATHS.status}
-        aria-current={active === 'status' ? 'page' : undefined}
-      >
-        <BarChart3 aria-hidden="true" />
-        <span className="tab__label">Status</span>
-      </Link>
-
-      <Link
-        className={tabClass('scheduled')}
-        to={TAB_PATHS.scheduled}
-        aria-current={active === 'scheduled' ? 'page' : undefined}
-      >
-        <Calendar aria-hidden="true" />
-        <span className="tab__label">Scheduled</span>
-      </Link>
-
-      <Link
-        className={tabClass('more')}
-        to={TAB_PATHS.more}
-        aria-current={active === 'more' ? 'page' : undefined}
-      >
-        <Settings aria-hidden="true" />
-        <span className="tab__label">More</span>
-      </Link>
-    </nav>
-  )
-}
+/* Leaflet is ~150 kB; keep it out of the shell so the header and buttons paint first. */
+const OutageMap = lazy(() =>
+  import('../components/OutageMap').then((module) => ({ default: module.OutageMap })),
+)
 
 export function MapPage() {
   const [selectedOutage, setSelectedOutage] = useState<Outage | null>(null)
@@ -101,7 +36,9 @@ export function MapPage() {
         </div>
       </header>
 
-      <OutageMap onSelectPin={setSelectedOutage} />
+      <Suspense fallback={<div className="map-area" aria-hidden="true" />}>
+        <OutageMap onSelectPin={setSelectedOutage} />
+      </Suspense>
 
       <section className="bottom-sheet" aria-label="Selected estate">
         <button type="button" className="estate-row">

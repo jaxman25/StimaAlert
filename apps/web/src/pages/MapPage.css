@@ -67,8 +67,7 @@
 
 .icon-button:focus-visible,
 .estate-row:focus-visible,
-.action-button:focus-visible,
-.tab:focus-visible {
+.action-button:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
@@ -182,57 +181,4 @@
   background: var(--blue);
 }
 
-/* ---------- Tab bar ---------- */
-
-.tab-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  flex: 0 0 auto;
-  padding: 8px 0 12px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-}
-
-.tab {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 0 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.tab svg {
-  width: 22px;
-  height: 22px;
-}
-
-.tab__label {
-  position: relative;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.tab--active {
-  color: var(--blue);
-}
-
-.tab--active .tab__label::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -6px;
-  width: 24px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--blue);
-  transform: translateX(-50%);
-}
+/* Tab bar styles live in components/AppTabBar.css. */

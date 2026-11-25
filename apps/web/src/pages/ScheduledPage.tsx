@@ -3,7 +3,7 @@ import { ArrowLeft, Calendar, ChevronRight, Info } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { fetchScheduledOutages, type ScheduledOutage } from '../lib/api'
 import { formatWindow, providerLabel } from '../lib/format'
-import { AppTabBar } from './MapPage'
+import { AppTabBar } from '../components/AppTabBar'
 import './ScheduledPage.css'
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000

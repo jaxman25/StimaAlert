@@ -3,7 +3,7 @@ import { ArrowLeft, Calendar, History, Send, Wifi, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { fetchEstateStatus, fetchScheduledOutages, type Outage, type ScheduledOutage } from '../lib/api'
 import { formatTime, formatWindow, providerLabel } from '../lib/format'
-import { AppTabBar } from './MapPage'
+import { AppTabBar } from '../components/AppTabBar'
 import './StatusPage.css'
 
 /* Matches the estate values stored on outages/scheduled rows. */
