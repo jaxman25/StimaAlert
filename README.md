@@ -11,20 +11,30 @@ skew the picture.
 
 ## Status
 
-Early MVP — the mobile UI is being built screen by screen from the mockups in `reference-ui/`.
-All data is currently **hardcoded**; Supabase is not wired into the web app yet.
+Working MVP, deployed at the live demo above. The web app reads and writes the real Supabase
+database, and outages, new-outage toasts and confirmation counts update live over realtime.
+The Telegram bot is still a scaffold.
 
 | # | Screen | State |
 |---|--------|-------|
 | 01 | Map home — Leaflet map, outage pins, estate sheet, tab bar | Built |
 | 02 | Report outage — power/net tiles, estate & provider pickers, CTA, skyline footer | Built |
 | 03 | Outage detail — bottom sheet over the dimmed map, confirmations, status | Built |
-| 04 | Estate status / follow | Not started |
-| 05 | Scheduled outages | Not started |
-| 06 | Admin scheduled entry | Not started |
+| 04 | Estate status / follow | Built |
+| 05 | Scheduled outages | Built |
+| 06 | Admin scheduled entry | Built, behind Supabase Auth |
 
-Navigation is plain `useState` in `apps/web/src/App.tsx` (`'map' | 'report' | 'status' | 'scheduled'`);
-React Router is not installed yet. The `status` and `scheduled` screens are placeholders.
+Routing uses React Router (`/`, `/report`, `/status`, `/scheduled`, `/more`, `/login`, `/admin`);
+`/admin` redirects to `/login` without a session. Reporting, confirming and resolving are wired to
+Supabase; scheduled outages reload live when the admin panel changes them.
+
+The frontend has had a zero-trust pass: every write validates its input, reads retry with
+exponential backoff, login throttling is surfaced distinctly, and the deployment serves a strict
+CSP and the usual hardening headers. See [`docs/SECURITY.md`](docs/SECURITY.md).
+
+Known gaps: outage and confirmation rows can still be deleted by anon until
+`007_admin_write_policies.sql` is applied, and `reports` only stays in step with the
+`confirmations` table once `003_triggers.sql` is applied.
 
 ## Repository layout
 
@@ -35,11 +45,14 @@ apps/
 packages/
   shared/       Shared types and Supabase client helpers — scaffold
 supabase/
-  migrations/   SQL migrations (001_init.sql)
+  migrations/   SQL migrations (001–007), applied in order
 docs/
   SPEC.md       Full MVP spec
   LAUNCH.md     Launch checklist
+  SECURITY.md   RLS, headers, rate limits and the localStorage tradeoff
 reference-ui/   Screen mockups (git-ignored, local only)
+vercel.json     Deployment: SPA rewrite, build config and security headers
+.vercelignore   Keeps the bot, edge functions and tests out of the build
 ```
 
 Each app installs its own dependencies — this is not an npm-workspaces monorepo, so run
@@ -56,7 +69,12 @@ npm run preview  # serve the production build
 npm run lint     # eslint
 ```
 
-Stack: React 19, TypeScript, Vite, Leaflet (via `react-leaflet`), Tailwind CSS 4, Lucide icons.
+Copy `apps/web/.env.example` to `apps/web/.env` and fill in `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY`. The anon key is designed to be public — row level security is what
+protects the data — and the app throws at startup if either value is missing.
+
+Stack: React 19, TypeScript, Vite, React Router, Supabase (Postgres + Realtime + Auth), Leaflet
+(via `react-leaflet`), Tailwind CSS 4, Lucide icons.
 
 Design tokens live as CSS variables in `apps/web/src/index.css` (navy `#001E49`, blue `#0048DB`,
 red `#E00812`, green `#11911D`, orange `#FE9800`, yellow `#FFDC0A`, plus tints and radii);
@@ -66,8 +84,19 @@ Screens live in `apps/web/src/pages/`, reusable map pieces in `apps/web/src/comp
 
 - `pages/MapPage.tsx` — header, map, estate bottom sheet, tab bar, outage detail modal
 - `pages/ReportPage.tsx` — report form and decorative skyline
-- `components/OutageMap.tsx` — Leaflet map, hardcoded pins, zoom/recenter controls
-- `components/OutageDetail.tsx` — outage detail bottom sheet
+- `components/OutageMap.tsx` — Leaflet map, live outage + scheduled pins, zoom/recenter controls
+- `components/OutageDetail.tsx` — outage detail bottom sheet with live confirmation count
+- `components/Toast.tsx` — "new outage reported" toast driven by realtime inserts
+
+Data and auth live in `apps/web/src/lib/`:
+
+- `lib/api.ts` — typed reads/writes, input validation, retry backoff (no raw Supabase calls in pages)
+- `lib/supabase.ts` — the single shared client, built from the two `VITE_` env vars
+- `lib/AuthContext.tsx` — session tracking, `signIn` / `signOut`, consumed via `useAuth()`
+- `lib/format.ts` — relative times, outage windows and provider labels
+
+`pages/LoginPage.tsx` is the admin gate; `App.tsx` holds `ProtectedRoute`, which blocks `/admin`
+until the stored session is restored.
 
 ## Telegram bot
 
@@ -80,21 +109,106 @@ npx tsx src/index.ts   # no npm scripts defined yet
 Requires `TELEGRAM_BOT_TOKEN` and Supabase credentials in the environment (see `docs/SPEC.md`).
 The bot currently has scaffolding only (`src/commands`, `src/notify.ts`, `src/prompts.ts`).
 
+## Admin access
+
+The scheduled outage panel at `/admin` requires a Supabase Auth session.
+
+1. In the Supabase dashboard, open **Authentication → Users → Add user**, enter an email and
+   password, and tick **Auto Confirm User** (otherwise the first login fails as unconfirmed).
+2. Open `/admin` — you are redirected to `/login` — and sign in with those credentials.
+3. **Log Out** in the top right of the admin header clears the session and returns to the map.
+
+The session persists across reloads via Supabase's localStorage session, so a signed-in admin
+stays signed in until they log out. The login entry point is also linked at the bottom of the
+**More** tab.
+
+Only an email/password user you create this way can manage scheduled outages; applying
+`007_admin_write_policies.sql` is what stops the anon key from doing the same writes directly
+against the API.
+
 ## Database
 
-`supabase/migrations/001_init.sql` defines the initial schema. Apply it with the Supabase CLI:
+`supabase/migrations/` holds the schema and its follow-up policies. **They must be applied in
+order** — later files drop and recreate policies from earlier ones:
+
+| File | What it does |
+|---|---|
+| `001_init.sql` | Schema, enums, indexes, RLS and demo seed rows |
+| `002_scheduled_delete_policy.sql` | Delete policy for scheduled outages |
+| `003_triggers.sql` | Keeps `reports` / vote counters in step with confirmations |
+| `004_realtime.sql` | Publishes `outages` and `confirmations` to realtime |
+| `005_write_policies.sql` | Delete/update policies for outages and confirmations |
+| `006_scheduled_realtime.sql` | Publishes `scheduled` to realtime |
+| `007_admin_write_policies.sql` | Admin writes require an authenticated session |
+
+Apply them with the Supabase CLI:
 
 ```bash
 supabase db push
 ```
 
+Or paste each file into the **SQL Editor** in the dashboard, in order. Every file except `001`
+is safe to re-run.
+
+## Security
+
+The frontend treats every request as potentially hostile and the database is the only real
+boundary — anyone can lift the anon key out of the bundle, so no guarantee lives in React.
+Full detail in [`docs/SECURITY.md`](docs/SECURITY.md); the short version:
+
+- **RLS on every table.** Public reads everywhere; anon may insert outages and confirmations
+  (that is the crowdsourcing mechanic); create/update/delete on `scheduled` and
+  update/delete on `outages` require an admin session (`007_admin_write_policies.sql`).
+- **Headers from Vercel.** Strict CSP (`script-src 'self'`, no inline script), `X-Frame-Options:
+  DENY`, `nosniff`, `strict-origin-when-cross-origin`, two-year HSTS, and a locked-down
+  `Permissions-Policy` — configured in `vercel.json`.
+- **Input validation before every write.** Outage type, estate name, provider and confirmation
+  kind are checked in `lib/api.ts` before anything reaches the API. Defense-in-depth only; the
+  Postgres enums are the enforcement.
+- **Backoff, not hammering.** `fetchActiveOutages` retries three times (1s, 2s, 4s) before
+  surfacing an error.
+- **Throttling is visible.** A `429` or "rate limit" from Supabase Auth shows "Too many attempts.
+  Please wait a few minutes and try again." rather than a credentials error.
+- **Known tradeoff: the session lives in `localStorage`**, which XSS could read. The CSP closes
+  the usual injection paths; moving to `httpOnly` cookies needs an SSR layer. Documented as
+  residual risk, not solved.
+
+## Deployment
+
+The web app is deployed on Vercel from this repo. The project's **Root Directory must be the repo
+root** — `vercel.json` lives here and sets the rest:
+
+| Setting | Value |
+|---|---|
+| `installCommand` | `npm ci --prefix apps/web` |
+| `buildCommand` | `npm run build --prefix apps/web` |
+| `outputDirectory` | `apps/web/dist` |
+| `rewrites` | every path → `/index.html` (SPA routing) |
+| `headers` | CSP + hardening headers on `/(.*)` |
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project's environment
+variables — the build bakes them in, so a change needs a redeploy. `.env` itself is gitignored and
+never deployed.
+
+Confirm the headers are actually served:
+
+```bash
+curl -sI https://stima-alert-web.vercel.app | grep -i content-security-policy
+```
+
+If that comes back empty, the project's Root Directory is probably set to `apps/web`, which makes
+Vercel ignore this `vercel.json` entirely.
+
 ## Docs
 
 - [`docs/SPEC.md`](docs/SPEC.md) — product spec, data model, API and bot flows
 - [`docs/LAUNCH.md`](docs/LAUNCH.md) — launch checklist
+- [`docs/SECURITY.md`](docs/SECURITY.md) — RLS matrix, CSP rationale, rate limits, token storage
 
 ## Next steps
 
-- Wire the report form and map pins to Supabase (replace the hardcoded data)
-- Build screens 04–06
-- Replace the `useState` navigation with React Router once screen count settles
+- Apply migrations `002`–`007` to the live database (see the table above)
+- Wire the Telegram bot handlers so `/follow` and the "is it back?" prompts work
+- Replace the demo user id in `apps/web/src/lib/api.ts` with real reporter identity
+- Build the `resolve-prompts` and `scheduled-notify` edge functions
+- Add a `role` column so any authenticated user isn't automatically an admin
