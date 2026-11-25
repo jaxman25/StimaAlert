@@ -35,7 +35,9 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    // The bot package is CommonJS, so TS must be allowed to downlevel the
+    // ESM-style imports it is written with.
+    "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",

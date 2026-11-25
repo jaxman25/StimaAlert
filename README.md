@@ -45,7 +45,7 @@ apps/
 packages/
   shared/       Shared types and Supabase client helpers — scaffold
 supabase/
-  migrations/   SQL migrations (001–007), applied in order
+  migrations/   SQL migrations (001–008), applied in order
 docs/
   SPEC.md       Full MVP spec
   LAUNCH.md     Launch checklist
@@ -103,11 +103,25 @@ until the stored session is restored.
 ```bash
 cd apps/bot
 npm install
-npx tsx src/index.ts   # no npm scripts defined yet
+cp .env.example .env   # then fill in TELEGRAM_BOT_TOKEN
+npm start              # tsx, loads .env
+npm run dev            # tsx watch — restarts on save
+npm run resolve-prompts  # cron job: "is power back?" prompts
 ```
 
-Requires `TELEGRAM_BOT_TOKEN` and Supabase credentials in the environment (see `docs/SPEC.md`).
-The bot currently has scaffolding only (`src/commands`, `src/notify.ts`, `src/prompts.ts`).
+Commands: `/start` registers the chat in `users`, `/follow <estate>` and `/unfollow <estate>`
+maintain `followed_estates`, `/status <estate>` reads active outages, and `/report` posts a
+PENDING outage via inline buttons.
+
+`npm start` runs long polling; `npm run resolve-prompts` is a one-shot job meant for a scheduler
+(Supabase Cron or Vercel Cron), not the poller. Set `DRY_RUN=1` to log who would be messaged
+without sending. It asks followers of an active estate two hours after a report, re-asks at most
+three times, resolves when back votes beat still-out votes by three, and resolves by timeout six
+hours after the last unanswered prompt.
+
+`apps/bot/.env` is gitignored. The entry point refuses to start without a token, initialises
+Telegraf, and stops cleanly on Ctrl-C. The bot needs `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY`; the web app must never see the service-role key.
 
 ## Admin access
 
@@ -140,6 +154,7 @@ order** — later files drop and recreate policies from earlier ones:
 | `005_write_policies.sql` | Delete/update policies for outages and confirmations |
 | `006_scheduled_realtime.sql` | Publishes `scheduled` to realtime |
 | `007_admin_write_policies.sql` | Admin writes require an authenticated session |
+| `008_prompt_count.sql` | `outages.prompt_count`, so the bot asks "is it back?" at most 3× |
 
 Apply them with the Supabase CLI:
 
@@ -207,8 +222,9 @@ Vercel ignore this `vercel.json` entirely.
 
 ## Next steps
 
-- Apply migrations `002`–`007` to the live database (see the table above)
-- Wire the Telegram bot handlers so `/follow` and the "is it back?" prompts work
+- Apply migrations `002`–`008` to the live database (see the table above); `008` is required
+  before `npm run resolve-prompts` can run
+- Schedule `npm run resolve-prompts` on a cron and point it at the bot host
 - Replace the demo user id in `apps/web/src/lib/api.ts` with real reporter identity
-- Build the `resolve-prompts` and `scheduled-notify` edge functions
+- Build the `scheduled-notify` job
 - Add a `role` column so any authenticated user isn't automatically an admin
